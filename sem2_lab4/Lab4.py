@@ -31,9 +31,17 @@ class Lab4(object):
         self._iterations = iterations
         self._revers = revers
         
-        self._first_series = np.array([start_series_first] * iterations)
-        self._second_series = np.array([start_series_second] * iterations)
-        self._third_series = np.array([self._calculate_third_series_value(0)] * iterations)
+        self._prev_value = -100.0
+        self._tolerance = 10e-3
+        
+        self._first_series = np.zeros(iterations, dtype="float")
+        if not revers:
+            self._first_series[0] = start_series_first
+        else:
+            self._first_series[-1] = start_series_first
+        self._second_series = np.zeros(iterations,dtype="float")
+        self._second_series[0] = start_series_second
+        self._third_series = np.zeros(iterations, dtype="float")
     
     def _calculate_third_series_value(self, iteration):
         value = self._d1 * self._f * self._first_series[iteration]
@@ -42,40 +50,44 @@ class Lab4(object):
         return value
     
     def _calculate_first_series_value(self, iteration):
-        value = self._g1 * self._c1 * self._first_series[iteration-1]
-        value += self._d1 * self._f * self._third_series[iteration-1]
-        value -= self._d1 * self._f * self._first_series[iteration-1] / 2.0
+        if  not self._revers:
+            value = self._g1 * self._c1 * self._first_series[iteration-1]
+            value -= self._d1 * self._f * self._first_series[iteration-1] / 2.0
+        else:
+            value = self._g1 * self._c1 * self._first_series[iteration+1]
+            value -= self._d1 * self._f * self._first_series[iteration+1] / 2.0    
+        value += self._d1 * self._f * self._third_series[iteration]
         value /= (self._g1 * self._c1 + self._d1 * self._f / 2.0)
         return value
     
     def _calculate_second_series_value(self, iteration):
         value = self._g2 * self._c2 * self._second_series[iteration-1]
-        value += self._d2 * self._f * self._third_series[iteration-1]
+        value += self._d2 * self._f * self._third_series[iteration]
         value -= self._d2 * self._f * self._second_series[iteration - 1] / 2.0
         value /= (self._g2 * self._c2 + self._d2 * self._f / 2.0)
         return value
     
     def main(self, iterations=10):
-        if self._revers:
+        while abs(self._prev_value - self._third_series[5]) > self._tolerance:
+            self._prev_value = self._third_series[5]
             for i in range(1, self._iterations):
-                self._first_series[i] = self._calculate_first_series_value(i)
-            for i in range(1, self._iterations):
+                self._second_series[i] = self._calculate_second_series_value(i)
+            for i in range(0, self._iterations):
                 self._third_series[i] = self._calculate_third_series_value(i)
-            for i in range(1, self._iterations):
-                self._second_series[self._iterations - i - 1] = self._calculate_second_series_value(self._iterations - i - 1)
-        for i in range(1, self._iterations):
-            self._third_series[i] = self._calculate_third_series_value(i)
-            self._first_series[i:i+2] = self._calculate_first_series_value(i)
-            self._second_series[i:i+2] = self._calculate_second_series_value(i)
-        self.print_seris(self._second_series, "T2")
-        self.print_seris(self._third_series, "T3")
-        self.print_seris(self._first_series, "T1")
+            if not self._revers:
+                for i in range(1, self._iterations):
+                    self._first_series[i] = self._calculate_first_series_value(i)
+            else:
+                for i in range(0, self._iterations-1):
+                    self._first_series[i] = self._calculate_first_series_value(i)      
+        self.print_data()
         self.plot()
     
-    @staticmethod
-    def print_seris(matrix, message):
-        print(message)
-        data = pd.DataFrame(matrix)
+    def print_data(self):
+        data = pd.DataFrame(list(zip(
+            self._second_series, self._third_series, self._first_series
+        )))
+        data.columns = ["T2", "T3", "T1"]
         display(data)
         
     def plot(self):
@@ -110,5 +122,24 @@ t2_start = 300.0
 
 iterations=10
 lab4 = Lab4(g1, g2, c1, c2, d1, d2, f, t1_start, t2_start, iterations)
+lab4.main()
+
+
+# In[4]:
+
+
+g1 = 0.5
+g2 = 0.5
+c1 = 5.0
+c2 = 5.0
+d1 = 20.0
+d2 = 20.0
+f = 0.05
+
+t1_start = 10.0
+t2_start = 300.0
+
+iterations=10
+lab4 = Lab4(g1, g2, c1, c2, d1, d2, f, t1_start, t2_start, iterations, revers=True)
 lab4.main()
 
