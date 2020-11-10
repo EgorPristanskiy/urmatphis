@@ -3,7 +3,7 @@
 
 # # Фильтрование
 
-# In[36]:
+# In[1]:
 
 
 import numpy as np
@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 pd.set_option('display.max_rows', None)
 
 
-# In[37]:
+# In[2]:
 
 
 class Lab8(object):
@@ -62,12 +62,12 @@ class Lab8(object):
         for i in range(1, self._iterations):
             self._v.append(self._calculate_new_v())
             self._w.append(self._calculate_new_w())
-        self.plot_data("Фильтрованиеб М3", self._v)
+        self.plot_data("Фильтрование, М3", self._v)
         self.plot_data("Скорость фильтрования, м/сек", self._w)
         self.print_data()
 
 
-# In[38]:
+# In[3]:
 
 
 v = 0.0
@@ -80,10 +80,4 @@ rfp = 20.0
 r = 20.0
 lab8 = Lab8(v, s, dp, m, r, t, x, rfp)
 lab8.main()
-
-
-# In[ ]:
-
-
-
 
